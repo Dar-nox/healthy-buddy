@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Card } from "@rneui/themed";
 
 export default function ChildHomeScreen() {
   const [childData, setChildData] = useState({ name: "Player", level: 1, coins: 106 });
+  const [quests, setQuests] = useState([
+    { id: 1, title: "🥦 Eat 2 servings of vegetables", reward: "50 XP, 10 Coins", coins: 10 },
+    { id: 2, title: "🚰 Drink 5 glasses of water", reward: "30 XP, 5 Coins", coins: 5 },
+  ]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -17,6 +21,15 @@ export default function ChildHomeScreen() {
     };
     loadData();
   }, []);
+
+  const removeQuest = (id: number, coins: number) => {
+    setQuests(quests.filter((quest) => quest.id !== id));
+    setChildData((prevData) => {
+      const updatedData = { ...prevData, coins: prevData.coins + coins };
+      AsyncStorage.setItem("childProfile", JSON.stringify(updatedData));
+      return updatedData;
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -43,14 +56,19 @@ export default function ChildHomeScreen() {
         <View style={styles.pin} />  
         <Text style={styles.sectionTitle}>Current Quests</Text>
         <ScrollView style={styles.quests}>
-          <Card containerStyle={styles.questCard}>
-            <Text>🥦 Eat 2 servings of vegetables</Text>
-            <Text style={styles.questReward}>Reward: 50 XP, 10 Coins</Text>
-          </Card>
-          <Card containerStyle={styles.questCard}>
-            <Text>🚰 Drink 5 glasses of water</Text>
-            <Text style={styles.questReward}>Reward: 30 XP, 5 Coins</Text>
-          </Card>
+          {quests.map((quest) => (
+            <Card containerStyle={styles.questCard} key={quest.id}>
+              <View style={styles.questContainer}>
+                <View>
+                  <Text>{quest.title}</Text>
+                  <Text style={styles.questReward}>Reward: {quest.reward}</Text>
+                </View>
+                <TouchableOpacity style={styles.checkButton} onPress={() => removeQuest(quest.id, quest.coins)}>
+                  <Text style={styles.checkButtonText}>✔</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          ))}
         </ScrollView>
       </View>
     </View>
@@ -155,10 +173,25 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  questContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   questReward: {
     fontSize: 14,
     color: "gray",
     marginTop: 5,
+  },
+  checkButton: {
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 5,
+  },
+  checkButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

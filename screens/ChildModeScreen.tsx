@@ -5,11 +5,12 @@ import ChildHomeScreen from "./ChildHomeScreen";
 import ShopScreen from "./ShopScreen";
 import FriendsScreen from "./FriendsScreen";
 import LeaderboardScreen from "./LeaderboardScreen";
+import SettingsScreen from "./SettingsScreen";
 import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
-// Custom Button for All Navigation Icons
+// Custom Button for Navigation Icons (Shop, Friends, Leaderboard, Settings)
 function CustomTabButton({ children, onPress, isHome }: any) {
   const [scale] = useState(new Animated.Value(1));
 
@@ -27,7 +28,7 @@ function CustomTabButton({ children, onPress, isHome }: any) {
       tension: 40,
       useNativeDriver: true,
     }).start();
-    onPress(); // Navigate after animation
+    onPress();
   };
 
   return (
@@ -39,13 +40,14 @@ function CustomTabButton({ children, onPress, isHome }: any) {
   );
 }
 
-export default function ChildModeScreen() {
+export default function ChildModeScreen({ setUserRole }) {
   return (
     <Tab.Navigator
+      initialRouteName="Home" // Set initial route to Home
       screenOptions={({ route }) => ({
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ focused }) => {
           let iconName;
           if (route.name === "Home") {
             iconName = "home";
@@ -55,8 +57,10 @@ export default function ChildModeScreen() {
             iconName = "people";
           } else if (route.name === "Leaderboard") {
             iconName = "trophy";
+          } else if (route.name === "Settings") {
+            iconName = "settings";
           }
-          return <Ionicons name={iconName as any} size={size} color={color} />;
+          return <Ionicons name={iconName as any} size={30} color={focused ? "#3498db" : "white"} />;
         },
         tabBarButton: (props) =>
           route.name === "Home" ? (
@@ -70,6 +74,9 @@ export default function ChildModeScreen() {
       <Tab.Screen name="Friends" component={FriendsScreen} />
       <Tab.Screen name="Home" component={ChildHomeScreen} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
+      <Tab.Screen name="Settings">
+        {(props) => <SettingsScreen {...props} setUserRole={setUserRole} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
